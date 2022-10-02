@@ -1,4 +1,6 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from .models import Manager, Department, Device
@@ -38,8 +40,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = ListDepartmentSerializer(queryset, many=True, context={'request': request})
-
-
         return Response(serializer.data)
 
 
@@ -55,8 +55,22 @@ class DeviceViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = ListDeviceSerializer(queryset, many=True, context={'request': request})
+        department_id = request.query_params.get('department_id', None)
 
-        return Response(serializer.data)
+        if not department_id:
+            queryset = self.get_queryset()
+            serializer = ListDeviceSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        else:
+            try:
+                int(department_id)
+                department = get_object_or_404(Department, department_id=department_id)
+                queryset = Device.objects.filter(department=department)
+                serializer = ListDeviceSerializer(queryset, many=True, context={'request': request})
+                return Response(serializer.data)
+            except ValueError:
+                raise NotFound(detail="Department_id should be int", code=404)
+
+
+
 
