@@ -38,14 +38,31 @@ class DepartmentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = ListDepartmentSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+        device_id = request.query_params.get('device_id', None)
+
+        if not device_id:
+            queryset = self.get_queryset()
+            serializer = ListDepartmentSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        else:
+            try:
+                int(device_id)
+                device = get_object_or_404(Device, device_id=device_id)
+                department = device.department
+                serializer = ListDepartmentSerializer(department, many=False, context={'request': request})
+                return Response(serializer.data)
+            except ValueError:
+                raise NotFound(detail="Wrong param value (device_id)", code=404)
+
+
+
+
+
 
 
 class DeviceViewSet(viewsets.ModelViewSet):
     """
-     API endpoint that allows managers to be viewed or edited.
+     API endpoint that allows devices to be viewed or edited.
      """
     queryset = Device.objects.all().order_by('name')
     serializer_class = DeviceSerializer
@@ -69,8 +86,4 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 serializer = ListDeviceSerializer(queryset, many=True, context={'request': request})
                 return Response(serializer.data)
             except ValueError:
-                raise NotFound(detail="Department_id should be int", code=404)
-
-
-
-
+                raise NotFound(detail="Wrong param value (department_id)", code=404)
