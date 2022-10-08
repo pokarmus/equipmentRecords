@@ -1,5 +1,23 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from PIL import Image as PImage
+
+
+class Image(models.Model):
+    image_id = models.BigAutoField(primary_key=True)
+    image = models.ImageField(upload_to='images/')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = PImage.open(self.image.path)
+
+        if img.height > 400 or img.width > 400:
+            output_size = (400, 400)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
+
+    def __str__(self):
+        return self.image.name
 
 
 class Manager(models.Model):
@@ -27,7 +45,7 @@ class Device (models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    image = models.ForeignKey(Image, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f'{self.name} - {self.barcode}'
-

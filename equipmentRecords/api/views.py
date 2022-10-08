@@ -2,18 +2,17 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
 
-from .models import Manager, Department, Device
+from .models import Manager, Department, Device, Image
 from .serializers import ManagerSerializer, DepartmentSerializer, DeviceSerializer, ListDeviceSerializer, \
-    ListManagerSerializer, ListDepartmentSerializer
+    ListManagerSerializer, ListDepartmentSerializer, ImageSerializer
 
 
 class ManagerViewSet(viewsets.ModelViewSet):
-    """
-     API endpoint that allows managers to be viewed or edited.
-     """
     queryset = Manager.objects.all().order_by('first_name', 'last_name')
     serializer_class = ManagerSerializer
+    authentication_classes = (TokenAuthentication, )
 
     def get_queryset(self):
         queryset = Manager.objects.all().order_by('first_name', 'last_name')
@@ -27,11 +26,9 @@ class ManagerViewSet(viewsets.ModelViewSet):
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
-    """
-     API endpoint that allows departments to be viewed or edited.
-     """
     queryset = Department.objects.all().order_by('name')
     serializer_class = DepartmentSerializer
+    authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
         queryset = Department.objects.all().order_by('name')
@@ -55,17 +52,10 @@ class DepartmentViewSet(viewsets.ModelViewSet):
                 raise NotFound(detail="Wrong param value (device_id)", code=404)
 
 
-
-
-
-
-
 class DeviceViewSet(viewsets.ModelViewSet):
-    """
-     API endpoint that allows devices to be viewed or edited.
-     """
     queryset = Device.objects.all().order_by('name')
     serializer_class = DeviceSerializer
+    authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
         queryset = Device.objects.all().order_by('name')
@@ -87,3 +77,9 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)
             except ValueError:
                 raise NotFound(detail="Wrong param value (department_id)", code=404)
+
+
+class ImageViewSet(viewsets.ModelViewSet):
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
+    authentication_classes = (TokenAuthentication,)

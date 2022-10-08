@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Manager, Department, Device
+from .models import Manager, Department, Device, Image
 
 
 class ManagerSerializer(serializers.HyperlinkedModelSerializer):
@@ -35,7 +35,7 @@ class DeviceSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Device
-        fields = ['name', 'barcode', 'description', 'device_id', 'department']
+        fields = ['name', 'barcode', 'description', 'device_id', 'department', 'image']
 
 
 class ListDeviceSerializer(serializers.HyperlinkedModelSerializer):
@@ -43,3 +43,10 @@ class ListDeviceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Device
         fields = ['name', 'barcode', 'url']
+
+
+class ImageSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Image
+        fields = ["image", "url"]
